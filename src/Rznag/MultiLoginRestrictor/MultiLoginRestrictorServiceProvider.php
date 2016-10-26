@@ -1,4 +1,4 @@
-<?php namespace Yottaram\MultiLoginRestrictor;
+<?php namespace Rznag\MultiLoginRestrictor;
 
 use Config;
 use DateTime;
@@ -7,7 +7,7 @@ use Event;
 use Illuminate\Support\ServiceProvider;
 use Log;
 use Session;
-use Yottaram\MultiLoginRestrictor\Models\UserLogin;
+use Rznag\MultiLoginRestrictor\Models\UserLogin;
 
 class MultiLoginRestrictorServiceProvider extends ServiceProvider {
 
@@ -25,18 +25,19 @@ class MultiLoginRestrictorServiceProvider extends ServiceProvider {
 	 */
 	public function boot()
 	{
-		$this->package('yottaram/multi-login-restrictor');
-
-        $this->app->bind('yottaram::multi-login:make-migration', function($app) {
+		$this->app->bind('rznag::multi-login:make-migration', function($app) {
             return new Commands\MakeMultiloginRestrictorMigrationCommand();
         });
         $this->commands(array(
-            'yottaram::multi-login:make-migration'
+            'rznag::multi-login:make-migration'
         ));
+
+        $this->publishes([
+            __DIR__.'/../../config/config.php' => config_path('multi-login-restrictor.php'),
+        ], 'config');
 
         $this->registerListeners();
 
-        include __DIR__.'/../../filters.php';
 	}
 
 	/**
@@ -52,7 +53,7 @@ class MultiLoginRestrictorServiceProvider extends ServiceProvider {
 
         $this->app->booting(function() {
             $loader = \Illuminate\Foundation\AliasLoader::getInstance();
-            $loader->alias('MultiLoginRestrictor', 'Yottaram\MultiLoginRestrictor\Facades\MultiLoginRestrictor');
+            $loader->alias('MultiLoginRestrictor', 'Rznag\MultiLoginRestrictor\Facades\MultiLoginRestrictor');
         });
 	}
 
@@ -70,28 +71,28 @@ class MultiLoginRestrictorServiceProvider extends ServiceProvider {
     protected function registerListeners()
     {
         // Listen for the login event and add this login time to the user logins table and the user's session object 
-        Event::listen('auth.login', function($user, $remember) {
-            Log::info('[Multi-login-restrictor] Logging in user ' . $user->id);
+        Event::listen(\Illuminate\Auth\Events\Login::class, function($user) {
+            Log::info('[Multi-login-restrictor] Logging in user ' . $user->user->id);
 
-            $userLoginsTable = Config::get('multi-login-restrictor::user_logins_table');
+            $userLoginsTable = Config::get('multi-login-restrictor.user_logins_table');
             $loginTime = new DateTime;
 
-            $userLogin = new UserLogin([ 'user_id' => $user->id, 'login_time' => $loginTime ]);
+            $userLogin = new UserLogin([ 'user_id' => $user->user->id, 'login_time' => $loginTime ]);
             $userLogin->save();
 
-            Session::put(Config::get('multi-login-restrictor::login_time_session_key'), $loginTime);
+            Session::put(Config::get('multi-login-restrictor.login_time_session_key'), $loginTime);
         });
 
         // Listen for the logout event and remove this user's login info from the logins table
-        Event::listen('auth.logout', function($user) {
-            Log::info('[Multi-login-restrictor] Logging out user ' . $user->id);
+        Event::listen(\Illuminate\Auth\Events\Logout::class, function($user) {
+            Log::info('[Multi-login-restrictor] Logging out user ' . $user->user->id);
 
-            $loginTimeSessionKey = Config::get('multi-login-restrictor::login_time_session_key');
+            $loginTimeSessionKey = Config::get('multi-login-restrictor.login_time_session_key');
 
-            $userLoginsTable = Config::get('multi-login-restrictor::user_logins_table');
+            $userLoginsTable = Config::get('multi-login-restrictor.user_logins_table');
             $loginTime = Session::get($loginTimeSessionKey);
 
-            $userLogin = UserLogin::where('user_id', $user->id)->where('login_time', $loginTime)->first();
+            $userLogin = UserLogin::where('user_id', $user->user->id)->where('login_time', $loginTime)->first();
             if ($userLogin)
             {
                 $userLogin->delete();

@@ -1,4 +1,4 @@
-<?php namespace Yottaram\MultiLoginRestrictor\Models;
+<?php namespace Rznag\MultiLoginRestrictor\Models;
 
 use Eloquent;
 use Config;

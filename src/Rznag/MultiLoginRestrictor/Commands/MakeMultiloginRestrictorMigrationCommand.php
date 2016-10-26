@@ -1,4 +1,4 @@
-<?php namespace Yottaram\MultiLoginRestrictor\Commands;
+<?php namespace Rznag\MultiLoginRestrictor\Commands;
 
 use Artisan;
 use Config;
@@ -39,16 +39,16 @@ class MakeMultiloginRestrictorMigrationCommand extends Command {
 	 */
 	public function fire()
 	{
-        $userLoginsTable = Config::get('multi-login-restrictor::user_logins_table');
+        $userLoginsTable = Config::get('multi-login-restrictor.user_logins_table');
 
         // create the user logins table migration
-        Artisan::call('generate:migration', [ 'migrationName' => "create_{$userLoginsTable}_table", '--fields' => 'user_id:integer, login_time:timestamp' ]);	
+        Artisan::call('make:migration:schema', [ 'name' => "create_{$userLoginsTable}_table", '--schema' => 'user_id:integer, login_time:timestamp', '--model' => false ]);
 
-        $usersTable = Config::get('multi-login-restrictor::users_table');
-        $seatsField = Config::get('multi-login-restrictor::users_num_seats_field');
+        $usersTable = Config::get('multi-login-restrictor.users_table');
+        $seatsField = Config::get('multi-login-restrictor.users_num_seats_field');
 
         // add the logins count to the users table
-        Artisan::call('generate:migration', [ 'migrationName' => "add_seats_to_{$usersTable}", '--fields' => "{$seatsField}:integer:default(1)" ]);
+        Artisan::call('make:migration:schema', [ 'name' => "add_seats_to_{$usersTable}", '--schema' => "{$seatsField}:integer:default(1)", '--model' => false ]);
 
         $this->info('Migrations created.  Run artisan migrate to complete the install');
 	}

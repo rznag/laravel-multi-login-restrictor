@@ -1,4 +1,4 @@
-<?php namespace Yottaram\MultiLoginRestrictor\Facades;
+<?php namespace Rznag\MultiLoginRestrictor\Facades;
  
 use Illuminate\Support\Facades\Facade;
  
