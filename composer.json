@@ -1,25 +1,29 @@
 {
-    "name": "yottaram/multi-login-restrictor",
+    "name": "rznag/multi-login-restrictor",
     "description": "",
     "authors": [
         {
             "name": "Jon Stavis",
             "email": "jstavis@gmail.com"
+        },
+        {
+            "name": "rznag",
+            "email": "rznag.rmrod@gmail.com"
         }
     ],
     "require": {
         "php": ">=5.3.0",
-        "illuminate/support": "4.*"
+        "illuminate/support": "5.3.*"
     },
     "require-dev": {
-        "way/generators": "2.*"
+        "laracasts/generators": "1.*"
     },
     "autoload": {
         "classmap": [
             "src/migrations"
         ],
         "psr-0": {
-            "Yottaram\\MultiLoginRestrictor\\": "src/"
+            "Rznag\\MultiLoginRestrictor\\": "src/"
         }
     },
     "minimum-stability": "stable"
