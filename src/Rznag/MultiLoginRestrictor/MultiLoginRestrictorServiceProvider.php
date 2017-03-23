@@ -47,7 +47,7 @@ class MultiLoginRestrictorServiceProvider extends ServiceProvider {
 	 */
 	public function register()
 	{
-        $this->app['multi-login-restrictor'] = $this->app->share(function($app) {
+        $this->app->singleton('multi-login-restrictor', function($app) {
             return new MultiLoginRestrictor;
         });		
 
